@@ -12,30 +12,42 @@
       margin: 0;
       padding: 0;
     }
-    #demo {
-      margin: var(--ddd-spacing-2);
-    }
     link-preview-card {
-      margin: var(--ddd-spacing-2);
-      border: var(--ddd-border-md);
+      margin: var(--ddd-spacing-1);
+      /* border: var(--ddd-border-md); */
       border-radius: var(--ddd-radius-lg);
+      max-width: 400px;;
+      display: flex;
+      flex-wrap: wrap;
     }
     link-preview-card:hover {
-      box-shadow: var(--ddd-boxShadow-sm);
-    }
-    #example {
-      --link-preview-card-font-size: var(--ddd-font-size-l);
-      background-color: var(--ddd-accent-2);
-      color: var(--ddd-primary-17);
+      box-shadow: 10px 10px 5px lightblue;
     }
   </style>
   <title>link-preview-card</title>
 </head>
 
 <body>
+  <h1 style="display: block;">Website Previews</h1>
+  <div id="demo" style="display: flex; flex-wrap: wrap;">
+    <!-- this is going to do whatever the tag's defaults are -->
+    <!-- <div>
+      <input id="input" placeholder="Search NASA images" @input="${this.inputChanged}" />
+    </div> -->
+    <link-preview-card web-link="https://www.ihop.com"></link-preview-card>
+    <link-preview-card web-link="https://www.apple.com"></link-preview-card>
+    <link-preview-card web-link="https://www.netflix.com"></link-preview-card>
+    <link-preview-card web-link="https://www.netflixs.com"></link-preview-card>
+    <link-preview-card web-link="https://www.owalalife.com"></link-preview-card>
+    <link-preview-card web-link="https://www.harvard.edu"></link-preview-card>
+  </div>
+  <script type="module" src="./link-preview-card.js"></script>
+</body>
+
+<!-- <body>
   <div id="demo">
     <h1>link-preview-card</h1>
-    <!-- this is going to do whatever the tag's defaults are -->
+    this is going to do whatever the tag's defaults are
     <h2>Default</h2>
     <link-preview-card></link-preview-card>
     <h2>Slot usage</h2>
@@ -45,7 +57,7 @@
   </div>
   <script type="module" src="./link-preview-card.js"></script>
 
-  <!-- Take HAX, the Web and you further down the rabbit hole -->
+  Take HAX, the Web and you further down the rabbit hole
   <style>
     #follow-the-white-rabbit {
       margin: var(--ddd-spacing-4) auto 64px  16px;
@@ -127,5 +139,10 @@
       </ul>
     </div>
   </details>
-</body>
+</body> -->
+
+
+
+
+
 </html>
