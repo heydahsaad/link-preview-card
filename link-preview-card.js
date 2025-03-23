@@ -77,6 +77,7 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
         border: var(--ddd-border-md);
         border-color: var(--ddd-theme-default-pughBlue);
         border-width: 8px;
+        background-color: var(--ddd-theme-default-potential75);
       }
       h3 span {
         font-size: var(--link-preview-card-label-font-size, var(--ddd-font-size-s));
@@ -89,27 +90,25 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
           height: auto;
           align-items: center;
           margin: 4px auto;
+          padding: 7px;
       }
 
       .logo{
           display: block;
           width: 100px;
+          margin-top: 30px;
       }
 
       .link{
         list-style: none;
-        padding: 4px;
-        margin: 4px auto;
+        padding: 8px;
+        margin: 10px auto;
         border-radius: var(--ddd-radius-lg);
         display: block;
         background-color: var(--ddd-theme-default-accent);
         color: white ;
         text-align:center;
       }
-
-      .link:hover{
-          color: red;
-        }
 
         .mainTitle{
          color: var(--ddd-theme-default-slateMaxLight);
@@ -119,6 +118,20 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
          font-family: Times, Times New Roman, serif;
          margin: var(--ddd-spacing-2);
          padding: var(--ddd-spacing-2);
+        }
+
+        tabbed-custom-element::part(tab active) {
+            border-color: blue !important;
+          }
+
+        details{
+          padding: 10px;
+          border: 5px solid #f7f7f7;
+          border-radius: 3px;
+        }
+
+        details:hover{
+          cursor:pointer;
         }
 
         .loader {
@@ -135,10 +148,6 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
           100% { transform: rotate(360deg); }
         }
     `];
-  }
-
-  defaultTheme(){
-    
   }
 
   updated(changedProperties) {
@@ -162,14 +171,15 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
     this.shadowRoot.getElementById("myDiv").style.display="block";
   }
 
+  
+
   updateResults() {
     this.loading = true;
     this.errorMessage = ""; // Reset previous errors
-  
+
     fetch(
       `https://corsproxy.io/?url=https://open-apis.hax.cloud/api/services/website/metadata?q=${this.webLink}`
     )
-
       .then(response => {
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
@@ -182,23 +192,43 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
                      response.data["title"] || "No Title Found";
         this.description = response.data["og:description"] || response.data["description"] || "No Description Available";
         this.imageLink = response.data["og:image"] || 
-                         (response.data["ld+json"]?.logo) || 
-                         (response.data["ld+json"]?.publisher?.logo) || 
-                         (response.data["msapplication-TileImage"]) ||
-                         (response.data["apple-touch-icon"]) ||
+                         response.data["ld+json"]?.logo || 
+                         response.data["ld+json"]?.publisher?.logo || 
+                         response.data["msapplication-TileImage"] ||
+                         response.data["apple-touch-icon"] ||
                          "fallback-image.png";
-        this.logo = response.data["ld+json"].logo;
+        this.logo = response.data["ld+json"]?.logo || null;
         this.themeColor = response.data["theme-color"] || (response.data["msapplication-TileColor"]) || "No color";
+
+        // Extract domain from webLink
+        const url = new URL(this.webLink);
+        const domain = url.hostname;
+
+        // Check if it's a PSU domain
+        if (response.data["theme-color"]) {
+          this.themeColor = response.data["theme-color"];
+        } else if (response.data["msapplication-TileColor"]) {
+          this.themeColor = response.data["msapplication-TileColor"];
+        } else {
+          // If no themeColor exists, apply PSU logic or random primary color
+          if (domain.endsWith("psu.edu")) {
+            this.themeColor = "var(--ddd-primary-2)"; // Nittany Navy
+          } else {
+            const randomIndex = Math.floor(Math.random() * 26); // Random number between 0 and 25
+            this.themeColor = `var(--ddd-primary-${randomIndex})`;
+          }
+        }
       })
 
       .catch(error => {
-        console.error("Fetch error",error);
-        this.errorMessage = "Error"
+        console.error("Fetch error", error);
+        this.errorMessage = "Error";
       })
       .finally(() => {
         this.loading = false; // Ensure loading stops
       });
-  }
+}
+
 
 
   // Lit render the HTML
@@ -206,8 +236,7 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
     return html`
     <div class="loader" id="loader"></div>
       <div class="wrapper" id="myDiv" style="display: none; border-color:${this.themeColor}" >
-          <p style="margin: 0px;" class="link">Visit: <a href="${this.webLink}" target="_blank">${this.webLink}</a></p>
-            
+          <p part="tab active" style="margin: 0px;" class="link">Visit: <a href="${this.webLink}" target="_blank">${this.webLink}</a></p>
           <img
             src="${this.imageLink}"
             alt="${this.t.title}: ${this.title}"
@@ -218,8 +247,11 @@ export class LinkPreviewCard extends DDDSuper(I18NMixin(LitElement)) {
                     color: ${this.themeColor === '#ffffff' ? 'black' : 'white'};">
             ${this.title}
           </h2>
-          <p style="text-shadow: 2px 0px 6px #000000;">${this.description}</p>
-          <p>Theme color: ${this.themeColor}</p>
+          <details>
+            <summary>More details</summary>
+            <p style="text-shadow: 2px 0px 6px #000000; padding: 10px;">${this.description}</p>
+          </details>
+          <!-- <p>Theme color: ${this.themeColor}</p> -->
           <img
             src="${this.logo}"   
             class="logo"     
